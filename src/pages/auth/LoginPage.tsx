@@ -3,111 +3,13 @@ import type { FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import LoginForm from "../../components/auth/LoginForm";
 import { authRepository } from "../../repositories/authRepository";
-
-function LoginPage() {
-  const navigate = useNavigate();
-  const [error, setError] = useState("");
-  const [registering, setRegistering] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    carnet: "",
-    email: "",
-    phone: "",
-    address: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  if (authRepository.isAuthenticated()) return <Navigate to="/" replace />;
-
-  const handleLogin = (credentials: { carnet: string; password: string }) => {
-    setError("");
-    const user = authRepository.login(credentials);
-    if (!user) {
-      setError("El carnet o la contraseña son incorrectos.");
-      return;
-    }
-    navigate("/", { replace: true });
-  };
-
-  const handleRegister = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError("");
-
-    if (form.password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
-      return;
-    }
-
-    if (form.password !== form.confirmPassword) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
-
-    const result = authRepository.register({
-      name: form.name,
-      carnet: form.carnet,
-      email: form.email,
-      phone: form.phone,
-      address: form.address,
-      password: form.password,
-    });
-
-    if (!result.user) {
-      setError(result.error || "No se pudo crear la cuenta.");
-      return;
-    }
-
-    navigate("/", { replace: true });
-  };
-
-  if (registering) {
-    return (
-      <main className="auth-page">
-        <div className="auth-decoration">
-          <span>Tu dinero, tus planes, tu futuro.</span>
-          <small>Proyecto académico de demostración</small>
-        </div>
-
-        <form className="auth-card register-card" onSubmit={handleRegister}>
-          <button className="back-link" type="button" onClick={() => { setRegistering(false); setError(""); }}>
-            ← Volver a iniciar sesión
-          </button>
-          <div className="brand-mark">₿</div>
-          <span className="eyebrow">BANCO DE PRÉSTAMOS</span>
-          <h1>Crear cuenta</h1>
-          <p className="auth-subtitle">Completa tus datos para crear un cliente de prueba.</p>
-
-          <div className="form-grid">
-            <div className="field"><label htmlFor="name">Nombre completo</label><input id="name" value={form.name} onChange={e => setForm({...form, name:e.target.value})} required /></div>
-            <div className="field"><label htmlFor="carnetReg">Carnet</label><input id="carnetReg" value={form.carnet} onChange={e => setForm({...form, carnet:e.target.value})} required /></div>
-            <div className="field"><label htmlFor="email">Correo</label><input id="email" type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} required /></div>
-            <div className="field"><label htmlFor="phone">Teléfono</label><input id="phone" value={form.phone} onChange={e => setForm({...form, phone:e.target.value})} required /></div>
-          </div>
-
-          <div className="field"><label htmlFor="address">Dirección</label><input id="address" value={form.address} onChange={e => setForm({...form, address:e.target.value})} placeholder="Ej. Barrio Centro, Sucre" required /></div>
-          <div className="form-grid">
-            <div className="field"><label htmlFor="passwordReg">Contraseña</label><input id="passwordReg" type="password" minLength={6} value={form.password} onChange={e => setForm({...form, password:e.target.value})} required /></div>
-            <div className="field"><label htmlFor="confirmPassword">Confirmar contraseña</label><input id="confirmPassword" type="password" minLength={6} value={form.confirmPassword} onChange={e => setForm({...form, confirmPassword:e.target.value})} required /></div>
-          </div>
-
-          {error && <p className="form-error" role="alert">{error}</p>}
-          <button className="primary-button full" type="submit">Registrarme</button>
-          <p className="demo-note">Los datos se guardan en la base de datos local de demostración.</p>
-        </form>
-      </main>
-    );
-  }
-
-  return (
-    <main className="auth-page">
-      <div className="auth-decoration">
-        <span>Tu dinero, tus planes, tu futuro.</span>
-        <small>Proyecto académico de demostración</small>
-      </div>
-      <LoginForm error={error} onSubmit={handleLogin} onRegister={() => { setRegistering(true); setError(""); }} />
-    </main>
-  );
+function LoginPage(){
+ const navigate=useNavigate();const [error,setError]=useState("");const [registering,setRegistering]=useState(false);
+ const [form,setForm]=useState({name:"",carnet:"",email:"",phone:"",address:"",password:"",confirmPassword:""});
+ const current=authRepository.getCurrentUser();if(current)return <Navigate to={current.role==="ADMIN"?"/admin":"/"} replace/>;
+ const handleLogin=(credentials:{carnet:string;password:string})=>{setError("");const user=authRepository.login(credentials);if(!user){setError("El carnet o la contraseña son incorrectos.");return;}navigate(user.role==="ADMIN"?"/admin":"/",{replace:true});};
+ const handleRegister=(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();setError("");if(form.password.length<6){setError("La contraseña debe tener al menos 6 caracteres.");return;}if(form.password!==form.confirmPassword){setError("Las contraseñas no coinciden.");return;}const result=authRepository.register({name:form.name,carnet:form.carnet,email:form.email,phone:form.phone,address:form.address,password:form.password});if(!result.user){setError(result.error||"No se pudo crear la cuenta.");return;}navigate("/",{replace:true});};
+ if(registering)return <main className="auth-page"><div className="auth-decoration"><span>Tu dinero, tus planes, tu futuro.</span><small>Proyecto académico de demostración</small></div><form className="auth-card register-card" onSubmit={handleRegister}><button className="back-link" type="button" onClick={()=>{setRegistering(false);setError("");}}>← Volver a iniciar sesión</button><div className="brand-mark">₿</div><span className="eyebrow">BANCO DE PRÉSTAMOS</span><h1>Crear cuenta</h1><p className="auth-subtitle">Completa tus datos para crear un cliente de prueba.</p><div className="form-grid"><div className="field"><label htmlFor="name">Nombre completo</label><input id="name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} required/></div><div className="field"><label htmlFor="carnetReg">Carnet</label><input id="carnetReg" value={form.carnet} onChange={e=>setForm({...form,carnet:e.target.value})} required/></div><div className="field"><label htmlFor="email">Correo</label><input id="email" type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} required/></div><div className="field"><label htmlFor="phone">Teléfono</label><input id="phone" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} required/></div></div><div className="field"><label htmlFor="address">Dirección</label><input id="address" value={form.address} onChange={e=>setForm({...form,address:e.target.value})} required/></div><div className="form-grid"><div className="field"><label htmlFor="passwordReg">Contraseña</label><input id="passwordReg" type="password" minLength={6} value={form.password} onChange={e=>setForm({...form,password:e.target.value})} required/></div><div className="field"><label htmlFor="confirmPassword">Confirmar contraseña</label><input id="confirmPassword" type="password" minLength={6} value={form.confirmPassword} onChange={e=>setForm({...form,confirmPassword:e.target.value})} required/></div></div>{error&&<p className="form-error" role="alert">{error}</p>}<button className="primary-button full" type="submit">Registrarme</button><p className="demo-note">Los datos se guardan en la base de datos local de demostración.</p></form></main>;
+ return <main className="auth-page"><div className="auth-decoration"><span>Tu dinero, tus planes, tu futuro.</span><small>Proyecto académico de demostración</small></div><LoginForm error={error} onSubmit={handleLogin} onRegister={()=>{setRegistering(true);setError("");}}/></main>;
 }
-
 export default LoginPage;
